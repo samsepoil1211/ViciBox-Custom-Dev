@@ -51,7 +51,7 @@ $cdl_api_url = str_replace('realtime_report.php','cdl_api.php',$PHP_SELF);
 echo "<br><span id='cdl_control_row'>";
 echo _QXZ("Select Campaign").": <select id='cdl_campaign'></select> &nbsp; ";
 echo _QXZ("Select Dial Level").": <select id='cdl_dial_level'></select> &nbsp; ";
-echo "<input type='button' id='cdl_reset_btn' value='"._QXZ("Reset Dial Level")."'> ";
+
 echo "<input type='button' id='cdl_set_btn' value='"._QXZ("Set Dial Level")."'> ";
 echo "<span id='cdl_msg'></span>";
 echo "</span><br>\n";
@@ -133,15 +133,7 @@ echo "</span><br>\n";
 			else cdl_msg('Error: '+r.err);
 		});
 	};
-	var rb=cdl_id('cdl_reset_btn'); if(rb)rb.onclick=function(){
-		var c=cdl_id('cdl_campaign');
-		if(!c||!c.value){cdl_msg('Pick a campaign first');return;}
-		if(!CDL_CANWRITE){cdl_msg('No permission');return;}
-		cdl_call('cdl_action=reset&cdl_campaign='+encodeURIComponent(c.value),function(r){
-			if(r.ok){cdl_levels(r.dial_level);cdl_msg('Dial level reset to '+r.dial_level);}
-			else cdl_msg('Error: '+r.err);
-		});
-	};
+
 	window.addEventListener('load',function(){
 		var grp=document.getElementById('groups[]');
 		if(grp){grp.addEventListener('change',function(){window.cdl_sync_from_report();});}

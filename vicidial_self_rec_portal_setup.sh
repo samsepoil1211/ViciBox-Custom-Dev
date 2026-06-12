@@ -834,10 +834,25 @@ ok "Indexer created"
 # STEP 7 — CRON (low load: nightly full index + 15min metadata sync)
 ###############################################################################
 info "Installing cron jobs..."
+# All times in UTC (IST = UTC+5:30)
+# 9:00 AM IST  = 03:30 UTC  — full daily index
+# 9:15 AM IST  = 03:45 UTC  \
+# 10:00 AM IST = 04:30 UTC   |
+# 11:00 AM IST = 05:30 UTC   | incremental runs every 30min
+# 12:00 PM IST = 06:30 UTC   | during business hours 9AM-3PM IST
+# 1:00 PM IST  = 07:30 UTC   |
+# 2:00 PM IST  = 08:30 UTC   |
+# 3:00 PM IST  = 09:30 UTC  /
 (crontab -l 2>/dev/null | grep -v "recording_portal\|indexer" ; \
- echo "0 2 * * * python3 $PORTAL_BASE/indexer.py >> $LOG 2>&1" ; \
- echo "*/15 * * * * python3 $PORTAL_BASE/indexer.py >> $LOG 2>&1") | crontab -
-ok "Cron installed (nightly 2AM full + every 15min for new files)"
+ echo "30 3 * * * nice -n 19 ionice -c 3 python3 $PORTAL_BASE/indexer.py >> $LOG 2>&1" ; \
+ echo "45 3 * * * nice -n 19 ionice -c 3 python3 $PORTAL_BASE/indexer.py >> $LOG 2>&1" ; \
+ echo "30 4 * * * nice -n 19 ionice -c 3 python3 $PORTAL_BASE/indexer.py >> $LOG 2>&1" ; \
+ echo "30 5 * * * nice -n 19 ionice -c 3 python3 $PORTAL_BASE/indexer.py >> $LOG 2>&1" ; \
+ echo "30 6 * * * nice -n 19 ionice -c 3 python3 $PORTAL_BASE/indexer.py >> $LOG 2>&1" ; \
+ echo "30 7 * * * nice -n 19 ionice -c 3 python3 $PORTAL_BASE/indexer.py >> $LOG 2>&1" ; \
+ echo "30 8 * * * nice -n 19 ionice -c 3 python3 $PORTAL_BASE/indexer.py >> $LOG 2>&1" ; \
+ echo "30 9 * * * nice -n 19 ionice -c 3 python3 $PORTAL_BASE/indexer.py >> $LOG 2>&1") | crontab -
+ok "Cron installed (IST 9AM daily full sync + every 30min 9AM-3PM IST)"
 
 ###############################################################################
 # STEP 8 — INITIAL INDEX (background, low priority)
@@ -872,7 +887,7 @@ echo "║   🗄️   Database:   $PORTAL_DB"
 echo "║   📄  Files:      $PORTAL_DIR"
 echo "║                                                          ║"
 echo "║   ⚙️   Server load design:                               ║"
-echo "║   • Indexer runs nightly 2AM + every 15min (low load)    ║"
+echo "║   • Full sync: 9AM IST daily, incremental every 30min 9AM-3PM IST    ║"
 echo "║   • UI refreshes every 10s only when tab is active       ║"
 echo "║   • All searches hit MySQL indexes (<200ms)              ║"
 echo "║   • Initial index runs at lowest CPU priority (nice 19)  ║"
